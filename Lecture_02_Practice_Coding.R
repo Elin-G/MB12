@@ -224,6 +224,9 @@ pie(os_count_df$Frequency, labels = os_count_df$OS, col = color_palette,
 
 #TEST
 
+# Calculate the percentage and create a new column "Experience_Percent"
+df$Experience_Percent <- (df$Experience / 10) * 100
+
 # Sort the DataFrame in descending order by "Experience_Percent"
 df <- df[order(-df$Experience_Percent), ]
 
@@ -238,26 +241,60 @@ bar_colors <- green_bar_palette[match(df$Experience_Percent, unique_experience_v
 
 # Set the y-axis limits and breaks
 y_limits <- c(0, 100)
-y_breaks <- seq(0, 100, 5)
 
 # Set the margin and adjust the axis title position
 par(mar = c(9, 5, 2, 2), mgp = c(6, 1, 0))  # Set the margin (bottom, left, top, right)
 
-# Add horizontal grid lines at every 5% point
-abline(h = seq(0, 100, 5), col = "darkgray", lty = 2, lwd = 0.5)
-
 # Create the graph with Experience_Percent
-barplot(df$Experience_Percent, names.arg = df$Name, xlab = "Name", ylab = "",
+barplot(df$Experience_Percent, names.arg = df$Name, xlab = "Name of Student", ylab = "",
         col = bar_colors, main = "",
-        ylim = y_limits, yaxp = c(0, 100, 20), las = 2, cex.names = 0.7,
-        cex.axis = 0.7)  # Adjust font size (0.7 is an example, you can change it)
+        ylim = y_limits, las = 2, cex.names = 0.7,
+        cex.axis = 0.7, axisnames = TRUE)  # Adjust font size (0.7 is an example, you can change it)
 
 # Add main titles separately for x and y axes
 title(main = "Programming Experience of EAGLES 8th Gen.", line = 0.5)
 title(ylab = "Programming Experience [%]", line = 2.5)
 
+# Overlay gridlines on top of the bars
+for (i in seq(0, 100, 5)) {
+  lines(x = c(0, nrow(df) + 1), y = c(i, i), col = "darkgray", lty = 2, lwd = 0.5)
+}
 
 # Restore the default margin and axis title position
 par(mar = c(5, 4, 4, 2) + 0.1, mgp = c(3, 1, 0))
+
+
+
+#test graph with ggplot2
+# Sort the dataframe by Experience_Percent in descending order
+df <- df[order(-df$Experience_Percent), ]
+
+# Your ggplot code with explicitly set y-axis breaks and labels
+gg <- ggplot(df, aes(x = reorder(Name, -Experience_Percent), y = Experience_Percent)) +
+  geom_bar(stat = "identity", fill = "lightblue") +
+  labs(x = "Name", y = "Experience Percent", title = "Programming Experience of EAGLES 8th Gen.") +
+  scale_y_continuous(
+    breaks = seq(0, 100, 5),  # Set y-axis breaks at 5% intervals
+    labels = paste0(seq(0, 100, 5), "%")  # Labels for the breaks
+  ) +
+  coord_cartesian(ylim = c(0, 100)) +  # Set y-axis limits from 0 to 100
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),  # Rotate x-axis labels if needed
+        plot.title = element_text(hjust = 0.5))  # Center the title
+
+# Print the plot
+print(gg)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
