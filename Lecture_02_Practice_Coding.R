@@ -265,22 +265,31 @@ par(mar = c(5, 4, 4, 2) + 0.1, mgp = c(3, 1, 0))
 
 
 
-#test graph with ggplot2
-# Sort the dataframe by Experience_Percent in descending order
+#test graph with ggplot2 --> creates a scale for colour
+
+library(ggplot2)
+library(scales)
+
+# Assuming your DataFrame is named "df" with columns "Name" and "Experience_Percent"
+
+# Sort the DataFrame by Experience_Percent in descending order
 df <- df[order(-df$Experience_Percent), ]
 
-# Your ggplot code with explicitly set y-axis breaks and labels
-gg <- ggplot(df, aes(x = reorder(Name, -Experience_Percent), y = Experience_Percent)) +
-  geom_bar(stat = "identity", fill = "lightblue") +
+# Your ggplot code with explicitly set y-axis breaks, labels, and adjusted line color
+gg <- ggplot(df, aes(x = reorder(Name, -Experience_Percent), y = Experience_Percent, fill = Experience_Percent)) +
+  geom_bar(stat = "identity") +
+  scale_fill_gradient(low = "lightgreen", high = "darkgreen", guide = guide_colorbar(nbin = 10)) +
   labs(x = "Name", y = "Experience Percent", title = "Programming Experience of EAGLES 8th Gen.") +
   scale_y_continuous(
     breaks = seq(0, 100, 5),  # Set y-axis breaks at 5% intervals
-    labels = paste0(seq(0, 100, 5), "%")  # Labels for the breaks
+    labels = percent_format(scale = 1)  # Use percentage labels for the breaks
   ) +
   coord_cartesian(ylim = c(0, 100)) +  # Set y-axis limits from 0 to 100
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),  # Rotate x-axis labels if needed
-        plot.title = element_text(hjust = 0.5))  # Center the title
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(hjust = 0.5),
+        panel.grid.major.y = element_line(color = "darkgray", linetype = "dotted", size = 0.71),
+        panel.grid.minor.y = element_blank())
 
 # Print the plot
 print(gg)
@@ -289,12 +298,95 @@ print(gg)
 
 
 
+#test3 --> is too light
+
+library(ggplot2)
+library(scales)
+
+# Sort the DataFrame by Experience_Percent in descending order
+df <- df[order(-df$Experience_Percent), ]
+
+# Define a color palette with the same colors for bars
+color_palette <- scales::brewer_pal(palette = "Greens")(length(df$Experience_Percent))
+
+# Create a factor to ensure a discrete scale
+df$color_factor <- cut(df$Experience_Percent, breaks = length(color_palette), labels = FALSE)
+
+# Your ggplot code with explicitly set y-axis breaks, labels, and adjusted line color
+gg <- ggplot(df, aes(x = reorder(Name, -Experience_Percent), y = Experience_Percent, fill = factor(color_factor))) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = color_palette) +
+  labs(x = "Name", y = "Experience Percent", title = "Programming Experience of EAGLES 8th Gen.") +
+  scale_y_continuous(
+    breaks = seq(0, 100, 5),  # Set y-axis breaks at 5% intervals
+    labels = percent_format(scale = 1)  # Use percentage labels for the breaks
+  ) +
+  coord_cartesian(ylim = c(0, 100)) +  # Set y-axis limits from 0 to 100
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(hjust = 0.5),
+        panel.grid.major.y = element_line(color = "darkgray", linetype = "dotted", size = 0.71),
+        panel.grid.minor.y = element_blank())
+
+# Print the plot
+print(gg)
 
 
 
 
+library(ggplot2)
+
+# Sort the DataFrame by Experience_Percent in descending order
+df <- df[order(-df$Experience_Percent), ]
+
+# Create a custom color palette with darker shades of green
+darker_greens <- c("#C7E8C9", "#00CC00", "#008800", "#006400","#004400")
+
+# Your ggplot code with the custom color palette and other settings
+gg <- ggplot(df, aes(x = reorder(Name, -Experience_Percent), y = Experience_Percent, fill = factor(color_factor))) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = darker_greens) +
+  labs(x = "Name", y = "Experience Percent", title = "Programming Experience of EAGLES 8th Gen.") +
+  scale_y_continuous(
+    breaks = seq(0, 100, 5),  # Set y-axis breaks at 5% intervals
+    labels = scales::percent_format(scale = 1)  # Use percentage labels for the breaks
+  ) +
+  coord_cartesian(ylim = c(0, 100)) +  # Set y-axis limits from 0 to 100
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(hjust = 0.5),
+        panel.grid.major.y = element_line(color = "darkgray", linetype = "dotted", size = 0.71),
+        panel.grid.minor.y = element_blank())
+
+# Print the plot
+print(gg)
 
 
 
+library(ggplot2)
 
+# Sort the DataFrame by Experience_Percent in descending order
+df <- df[order(-df$Experience_Percent), ]
 
+# Create a custom color palette with darker shades of green
+darker_greens <- c("#C7E8C9", "#00CC00", "#008800", "#006400", "#004400")
+
+# Your ggplot code with the custom color palette and other settings
+gg <- ggplot(df, aes(x = reorder(Name, -Experience_Percent), y = Experience_Percent, fill = factor(color_factor))) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = darker_greens) +
+  labs(x = "Name", y = "Experience", title = "Programming Experience of EAGLES 8th Gen.") +
+  scale_y_continuous(
+    breaks = seq(0, 100, 5),  # Set y-axis breaks at 5% intervals
+    labels = scales::percent_format(scale = 1)  # Use percentage labels for the breaks
+  ) +
+  coord_cartesian(ylim = c(0, 100)) +  # Set y-axis limits from 0 to 100
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(hjust = 0.5),
+        panel.grid.major.y = element_line(color = "darkgray", linetype = "dotted", size = 0.71),
+        panel.grid.minor.y = element_blank()) +
+  guides(fill = FALSE)  # Remove the color scale/legend
+
+# Print the plot
+print(gg)
