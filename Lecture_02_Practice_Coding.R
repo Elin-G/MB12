@@ -34,7 +34,7 @@ df$Name <- gsub("ushakova", "Ushakova", df$Name)
 #trim whitespace function of R trims the beginning and end of the string
 trimws(df$Name)
 df$Name <- trimws(df$Name) #overwrite the Name column
-#View(df)
+View(df)
 
 #clean Experience
 #"[*]" makes everything inside the brackets literal, so it can be deleted
@@ -71,13 +71,13 @@ gg <- ggplot(df, aes(x = reorder(Name, -Experience_Percent), y = Experience_Perc
     labels = percent_format(scale = 1)  # Use percentage labels for the breaks
   ) +
   coord_cartesian(ylim = c(0, 100)) +  # Set y-axis limits from 0 to 100
-  labs(x = "Name", y = "Experience Percent", title = "Programming Experience of EAGLES 8th Gen.") +
+  labs(x = "Name", y = "Experience", title = "Programming Experience of EAGLES 8th Gen.") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
         plot.title = element_text(hjust = 0.5),
-        panel.grid.major.y = element_line(color = "darkgray", linetype = "dotted", size = 0.71),
+        panel.grid.major.y = element_line(color = "darkgray", linetype = "dotted", linewidth = 0.71),
         panel.grid.minor.y = element_blank()) +
-  guides(fill = FALSE)  # Remove the color scale/legend
+  guides(fill = "none")  # Remove the color scale/legend
 
 # Print the plot
 print(gg)
@@ -117,7 +117,7 @@ df$Language <- gsub("gee \\(javascript\\)", "gee, javascript", df$Language)
 df$Language <- trimws(df$Language)
 
 #Capitalising each word in df$Language
-#library(tools)
+library(tools)
 df$Language <- toTitleCase(df$Language)
 df$Language <- gsub("Javascript", "JavaScript", df$Language)
 df$Language <- gsub("Html", "HTML", df$Language)
@@ -146,16 +146,16 @@ View(df)
 #from the Language vector from Task 1.
 
 # Install wordcloud package
-#install.packages("wordcloud")
-#library(wordcloud)
+install.packages("wordcloud")
+library(wordcloud)
 
 # Install the required packages
-#install.packages("tm")
-#install.packages("slam")
+install.packages("tm")
+install.packages("slam")
 
 # Load the necessary packages
 #library(wordcloud)
-#library(tm)  # Load the 'tm' package
+library(tm)  # Load the 'tm' package
 
 #look at RColorBrewer for colour combinations
 display.brewer.all(colorblindFriendly = TRUE)
@@ -221,182 +221,3 @@ colnames(os_count_df) <- c("OS", "Frequency")
 pie(os_count_df$Frequency, labels = os_count_df$OS, col = color_palette,
     main = "Operating Systems of EAGLES
     8th Gen.")
-
-
-
-
-#TEST
-
-# Calculate the percentage and create a new column "Experience_Percent"
-df$Experience_Percent <- (df$Experience / 10) * 100
-
-# Sort the DataFrame in descending order by "Experience_Percent"
-df <- df[order(-df$Experience_Percent), ]
-
-# Get unique values in the "Experience_Percent" column
-unique_experience_values <- unique(df$Experience_Percent)
-
-# Create a custom color palette with distinct colors for each unique value
-green_bar_palette <- rev(brewer.pal(length(unique_experience_values), "Greens"))
-
-# Assign colors to bars based on the unique values
-bar_colors <- green_bar_palette[match(df$Experience_Percent, unique_experience_values)]
-
-# Set the y-axis limits and breaks
-y_limits <- c(0, 100)
-
-# Set the margin and adjust the axis title position
-par(mar = c(9, 5, 2, 2), mgp = c(6, 1, 0))  # Set the margin (bottom, left, top, right)
-
-# Create the graph with Experience_Percent
-barplot(df$Experience_Percent, names.arg = df$Name, xlab = "Name of Student", ylab = "",
-        col = bar_colors, main = "",
-        ylim = y_limits, las = 2, cex.names = 0.7,
-        cex.axis = 0.7, axisnames = TRUE)  # Adjust font size (0.7 is an example, you can change it)
-
-# Add main titles separately for x and y axes
-title(main = "Programming Experience of EAGLES 8th Gen.", line = 0.5)
-title(ylab = "Programming Experience [%]", line = 2.5)
-
-# Overlay gridlines on top of the bars
-for (i in seq(0, 100, 5)) {
-  lines(x = c(0, nrow(df) + 1), y = c(i, i), col = "darkgray", lty = 2, lwd = 0.5)
-}
-
-# Restore the default margin and axis title position
-par(mar = c(5, 4, 4, 2) + 0.1, mgp = c(3, 1, 0))
-
-
-
-#test graph with ggplot2 --> creates a scale for colour
-
-library(ggplot2)
-library(scales)
-
-# Assuming your DataFrame is named "df" with columns "Name" and "Experience_Percent"
-
-# Sort the DataFrame by Experience_Percent in descending order
-df <- df[order(-df$Experience_Percent), ]
-
-# Your ggplot code with explicitly set y-axis breaks, labels, and adjusted line color
-gg <- ggplot(df, aes(x = reorder(Name, -Experience_Percent), y = Experience_Percent, fill = Experience_Percent)) +
-  geom_bar(stat = "identity") +
-  scale_fill_gradient(low = "lightgreen", high = "darkgreen", guide = guide_colorbar(nbin = 10)) +
-  labs(x = "Name", y = "Experience Percent", title = "Programming Experience of EAGLES 8th Gen.") +
-  scale_y_continuous(
-    breaks = seq(0, 100, 5),  # Set y-axis breaks at 5% intervals
-    labels = percent_format(scale = 1)  # Use percentage labels for the breaks
-  ) +
-  coord_cartesian(ylim = c(0, 100)) +  # Set y-axis limits from 0 to 100
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        plot.title = element_text(hjust = 0.5),
-        panel.grid.major.y = element_line(color = "darkgray", linetype = "dotted", size = 0.71),
-        panel.grid.minor.y = element_blank())
-
-# Print the plot
-print(gg)
-
-
-
-
-
-#test3 --> is too light
-
-library(ggplot2)
-library(scales)
-
-# Sort the DataFrame by Experience_Percent in descending order
-df <- df[order(-df$Experience_Percent), ]
-
-# Define a color palette with the same colors for bars
-color_palette <- scales::brewer_pal(palette = "Greens")(length(df$Experience_Percent))
-
-# Create a factor to ensure a discrete scale
-df$color_factor <- cut(df$Experience_Percent, breaks = length(color_palette), labels = FALSE)
-
-# Your ggplot code with explicitly set y-axis breaks, labels, and adjusted line color
-gg <- ggplot(df, aes(x = reorder(Name, -Experience_Percent), y = Experience_Percent, fill = factor(color_factor))) +
-  geom_bar(stat = "identity") +
-  scale_fill_manual(values = color_palette) +
-  labs(x = "Name", y = "Experience Percent", title = "Programming Experience of EAGLES 8th Gen.") +
-  scale_y_continuous(
-    breaks = seq(0, 100, 5),  # Set y-axis breaks at 5% intervals
-    labels = percent_format(scale = 1)  # Use percentage labels for the breaks
-  ) +
-  coord_cartesian(ylim = c(0, 100)) +  # Set y-axis limits from 0 to 100
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        plot.title = element_text(hjust = 0.5),
-        panel.grid.major.y = element_line(color = "darkgray", linetype = "dotted", size = 0.71),
-        panel.grid.minor.y = element_blank())
-
-# Print the plot
-print(gg)
-
-
-
-
-library(ggplot2)
-
-# Sort the DataFrame by Experience_Percent in descending order
-df <- df[order(-df$Experience_Percent), ]
-
-# Create a custom color palette with darker shades of green
-darker_greens <- c("#C7E8C9", "#00CC00", "#008800", "#006400", "#004400")
-
-# Your ggplot code with the custom color palette and other settings
-gg <- ggplot(df, aes(x = reorder(Name, -Experience_Percent), y = Experience_Percent)) +
-  geom_bar(stat = "identity", fill = "lightblue") +
-  scale_y_continuous(
-    breaks = seq(0, 100, 5),  # Set y-axis breaks at 5% intervals
-    labels = scales::percent_format(scale = 1)  # Use percentage labels for the breaks
-  ) +
-  coord_cartesian(ylim = c(0, 100)) +  # Set y-axis limits from 0 to 100
-  labs(x = "Name", y = "Experience Percent", title = "Programming Experience of EAGLES 8th Gen.") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        plot.title = element_text(hjust = 0.5),
-        panel.grid.major.y = element_line(color = "darkgray", linetype = "dotted", size = 0.71),
-        panel.grid.minor.y = element_blank())
-
-# Print the plot
-print(gg)
-
-
-library(ggplot2)
-library(scales)
-
-# Sort the DataFrame by Experience_Percent in descending order
-df <- df[order(-df$Experience_Percent), ]
-
-# Create a custom color palette with darker shades of green
-darker_greens <- c("#C7E8C9", "#00CC00", "#006400", "#003300", "#003300")
-
-# Create a factor for colors based on the custom palette
-df$color_factor <- cut(df$Experience_Percent, breaks = length(darker_greens), labels = FALSE)
-
-# Your ggplot code with the custom color palette and other settings
-gg <- ggplot(df, aes(x = reorder(Name, -Experience_Percent), y = Experience_Percent, fill = factor(color_factor))) +
-  geom_bar(stat = "identity") +
-  scale_fill_manual(values = darker_greens) +
-  scale_y_continuous(
-    breaks = seq(0, 100, 5),  # Set y-axis breaks at 5% intervals
-    labels = percent_format(scale = 1)  # Use percentage labels for the breaks
-  ) +
-  coord_cartesian(ylim = c(0, 100)) +  # Set y-axis limits from 0 to 100
-  labs(x = "Name", y = "Experience Percent", title = "Programming Experience of EAGLES 8th Gen.") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        plot.title = element_text(hjust = 0.5),
-        panel.grid.major.y = element_line(color = "darkgray", linetype = "dotted", size = 0.71),
-        panel.grid.minor.y = element_blank()) +
-  guides(fill = FALSE)  # Remove the color scale/legend
-
-# Print the plot
-print(gg)
-
-
-
-
-
