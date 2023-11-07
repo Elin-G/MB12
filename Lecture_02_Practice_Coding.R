@@ -116,26 +116,6 @@ df$Language <- gsub("r-studio", "rstudio", df$Language)        # NOTE: do it sep
 df$Language <- gsub("gee \\(javascript\\)", "gee, javascript", df$Language)
 df$Language <- trimws(df$Language)
 
-#Capitalising each word in df$Language
-library(tools)
-df$Language <- toTitleCase(df$Language)
-df$Language <- gsub("Javascript", "JavaScript", df$Language)
-df$Language <- gsub("Html", "HTML", df$Language)
-df$Language <- gsub("Sql", "SQL", df$Language)
-df$Language <- gsub("Rstudio", "RStudio", df$Language)
-df$Language <- gsub("Matlab", "MATLAB", df$Language)
-df$Language <- gsub("Gee", "GEE", df$Language)
-df$Language <- gsub("Qgis", "QGIS", df$Language)
-
-
-
-
-
-# Split the 'Language' column by the comma and create a vector
-language_vector <- unlist(strsplit(df$Language, ", "))
-
-# Print the resulting vector
-print(language_vector)
 
 print(df)
 
@@ -145,23 +125,58 @@ View(df)
 #install the package wordcloud load it, and if you can try to make a wordcloud
 #from the Language vector from Task 1.
 
-# Install wordcloud package
-install.packages("wordcloud")
-library(wordcloud)
-
 # Install the required packages
-install.packages("tm")
-install.packages("slam")
+#install.packages("wordcloud")
+#install.packages("RColorBrewer")
+#install.packages("wordcloud2")
+#install.packages("tm")
 
 # Load the necessary packages
-#library(wordcloud)
-library(tm)  # Load the 'tm' package
+library(wordcloud)
+library(RColorBrewer)
+library(wordcloud2)
+library(tm)
 
-#look at RColorBrewer for colour combinations
+# Split the 'Language' column by the comma and create a vector
+#Create a vector containing only the text
+language_vector <- unlist(strsplit(df$Language, ", "))
+View(language_vector)
+
+# Remove any leading/trailing spaces and empty strings
+language_vector <- language_vector[language_vector != ""]
+
+# If you want to include single-letter words, you can adjust the min_word_length
+min_word_length <- 0
+
+#Create a corpus
+corpus_Language <- Corpus(VectorSource(language_vector))
+View(corpus_Language)
+
+#Create a document-term-matrix: dataframe containing each word in first column
+# and frequency in second column
+#Create a document term matric with TermDocumentMatric function of tm package
+dtm_Language <- TermDocumentMatrix(corpus_Language, control = list(wordLengths = c(min_word_length, Inf)))
+matrix_Language <- as.matrix(dtm_Language)
+words_Language <- sort(rowSums(matrix_Language), decreasing = TRUE)
+df_Language <- data.frame(word = names(words_Language), freq = words_Language)
+View(dtm_Language)
+View(df_Language)
+View(language_vector)
+
+#look at RColorBrewer for colour combinations that are colourblind friendly
 display.brewer.all(colorblindFriendly = TRUE)
 
 # Create a word cloud
-wordcloud(words = language_vector, min.freq = 1, scale = c(3, 0.7), colors = brewer.pal(8, "Paired"))
+wordcloud(
+  words = df_Language$word,
+  freq = df_Language$freq,
+  min.freq = 1,
+  scale = c(3, 0.7), 
+  colors = brewer.pal(8, "Paired"),
+  random.order = FALSE #added to prevent warnings
+)
+
+View(df_Language)
 
 
 
@@ -200,9 +215,11 @@ os_vector <- unlist(strsplit(df$OS, ", "))
 # Print the resulting vector
 print(os_vector)
 
+
 #create a pie chart
+
 #install color brewer package
-install.packages("RColorBrewer")
+#install.packages("RColorBrewer")
 # Load the RColorBrewer library
 library(RColorBrewer)
 
@@ -217,7 +234,12 @@ os_count <- table(os_vector)
 os_count_df <- as.data.frame(os_count)
 colnames(os_count_df) <- c("OS", "Frequency")
 
-# Step 3: Create a pie chart
-pie(os_count_df$Frequency, labels = os_count_df$OS, col = color_palette,
+# Calculate percentages
+os_count_df$Percentage <- os_count_df$Frequency / sum(os_count_df$Frequency) * 100
+
+# Step 3: Create a pie chart with percentages
+labels <- paste(os_count_df$OS, " (", round(os_count_df$Percentage, 1), "%)")
+
+pie(os_count_df$Frequency, labels = labels, col = color_palette,
     main = "Operating Systems of EAGLES
     8th Gen.")
