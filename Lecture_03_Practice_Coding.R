@@ -50,7 +50,9 @@ nrow(df_data_energy_day2)
 df_data_energy_day2$DateTime
 typeof(df_data_energy_day2$DateTime) #character means it's not interpreted
 #so it cannot be analysed
-class(df$DateTime) # make this sotable (= not character)
+#what class is the dataframe?: character
+class(df_data_energy_day2$DateTime) # make this sortable (= not character)
+#transform into POSIXct
 df_data_energy_day2$DateTimePOS <- as.POSIXct(df_data_energy_day2$DateTime)
 
 #make first scatter plot
@@ -72,5 +74,96 @@ plot(
   y = df_no_outliers$ActualGenerationOutput
 )
 
+# we still see some outliers and we already see how the data is distributed
+
+#-------------------------------------------------------------------------------
+
+# TASK: Create plots using plot and ggplot syntax. Find out more information
+# about our dataset!
+# for example: 
+# - plot the number of power plants per production type, or
+# - production capacity per type
+
+plants <- df_no_outliers[,c("GenerationUnitEIC", "ProductionTypeName")]
+counts <- table(plants$ProductionTypeName)
+
+barplot(counts, horiz = T )
+barplot(sort(counts), horiz = T, las = 1,
+        col = rainbow(length(counts)))
+
+length(counts)
+plants <- unique(df$GenerationUnitEIC)
+
+#create graphics device for saving
+dev.off()
+png("entsoe_prdtype_units.png", width = 700, height = 700)
+par(mar = c(6, 15, 4, 4))
+barplot(sort(counts), horiz = T, las = 1,
+        col = rainbow(length(counts)))
+title(main = "Number of records per production type\nacross the EU, 1st week of Aug. 2020",
+      xlab = "Number of records")
+dev.off()
+
+#plot 2: production capacity per type
+#aggregation or production capacity per type
+df_agg_type <- aggregate(
+  df_data_energy_day2$InstalledGenCapacity,
+  by = list(df_data_energy_day2$ProductionTypeName),
+  FUN = sum
+)
+#view the first 6 lines of the new df
+head(df_agg_type)
+#overrade the column names
+colnames(df_agg_type) <- c(
+  "ProductionTypeName",
+  "InstalledGenCapacity_sum"
+)
+
+df_agg_type$InstalledGenCapacity_sum <- df_agg_type$InstalledGenCapacity_sum * 0.001
 
 
+
+
+# ---------------TASK 1: plot this a barplot in ggplot2-------------------------
+# Your ggplot code with the custom color palette and other settings
+#-------------------------------------------------------------------------------
+#order the dataframe by installed capacity
+#install the necessary libraries
+library(dplyr)
+
+# Sort the DataFrame by InstalledGenCapacity_sum in descending order
+df_agg_type <- df_agg_type %>%
+  arrange(InstalledGenCapacity_sum)
+
+# Convert ProductionTypeName to a factor with levels based on the order of InstalledGenCapacity_sum
+df_agg_type$ProductionTypeName <- factor(df_agg_type$ProductionTypeName, levels = df_agg_type$ProductionTypeName)
+
+View(df_agg_type)
+
+
+#df_agg_type <- df_agg_type[order(-df_agg_type$InstalledGenCapacity_sum), ]
+#df_agg_type$ProductionTypeName <- factor(df_agg_type$ProductionTypeName, levels = unique(df_agg_type$ProductionTypeName))
+
+gg <- ggplot(df_agg_type, aes(x = ProductionTypeName, y = InstalledGenCapacity_sum, fill = ProductionTypeName)) +
+  geom_bar(stat = "identity", show.legend = F) +
+  scale_y_continuous(
+    breaks = seq(0, 27000, 1000),  # Set x-axis breaks at intervals of 1000
+    expand = c(0, 0.5)  # Set the expansion for minor grid lines
+#    labels = percent_format(scale = 1)  # Use percentage labels for the breaks
+  ) +
+  coord_cartesian(ylim = c(0, 27000)) +  # Set y-axis limits from 0 to 26310
+  labs(x = "Production Type", y = "Sum of Installed Generator Capacity", title = "Sum of Installed Generator Capacity of different Production Types") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 25, hjust = 1),
+        plot.title = element_text(hjust = 0.5),
+        panel.grid.major.x = element_line(color = "darkgray", linetype = "dotted", linewidth = 0.71),
+        panel.grid.minor.x = element_blank()) +
+  guides(fill = "none") + # Remove the color scale/legend
+  coord_flip() + #flip the x and y axes
+  geom_hline(yintercept = seq(0, 27000, 500), linetype = "dotted", color = "darkgray", size = 0.5)
+
+# Print the plot
+print(gg)
+
+
+#-----------------------CONTINUE ON SLIDE 18 - LECTURE 04 ----------------------
